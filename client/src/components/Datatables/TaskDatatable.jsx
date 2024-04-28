@@ -14,14 +14,17 @@ import { setEmptyMessage } from "../../features/users/userSlice";
 import createToast from "../../utils/createToast";
 import { authSelector } from "../../features/auth/authSlice";
 import { updateTask } from "../../features/task/taskApiSlice";
-import { setEmptyTaskMessage, taskSelector } from "../../features/task/taskSlice";
+import {
+  setEmptyTaskMessage,
+  taskSelector,
+} from "../../features/task/taskSlice";
 import API from "../../utils/api";
 
 const TaskDatatable = () => {
   const dispatch = useDispatch();
 
   const { user } = useSelector(authSelector);
-  const {taskloader, taskmessage, taskerror} = useSelector(taskSelector)
+  const { taskloader, taskmessage, taskerror } = useSelector(taskSelector);
 
   const { input, setInput, handleInputChange } = useForm({
     whereFrom: "",
@@ -48,50 +51,43 @@ const TaskDatatable = () => {
     }));
   };
 
-  const handleTaskModalForm = async(e)=>{
+  const handleTaskModalForm = async (e) => {
     e.preventDefault();
-    const { status, progress, _id} =
-    input;
-  const formData = {
-    status,
-    progress,
-    _id
-  }; // Convert status to boolean
+    const { status, progress, _id } = input;
+    const formData = {
+      status,
+      progress,
+      _id,
+    }; // Convert status to boolean
 
+    // Dispatch the updateUser action
+    await dispatch(updateTask(formData));
 
-  // Dispatch the updateUser action
-  await dispatch(updateTask(formData));
+    // Fetch the updated data from the server
+    try {
+      const response = await API.get(`/api/v1/task/${user._id}`);
+      const sortedData = response.data.userTask.task.reverse().map((item) => ({
+        ...item,
+        file: (
+          <>
+            <p hidden>{item.file}</p>
+          </>
+        ), // Embedding the file link in img tag
+      }));
 
+      setData(sortedData); // Update the table data state with the updated data
+    } catch (error) {
+      createToast("Error updating user information", "error");
+    }
 
-  // Fetch the updated data from the server
-  try {
-    const response = await API.get(
-      `/api/v1/task/${user._id}`
-    );
-    const sortedData = response.data.userTask.task.reverse().map((item) => ({
-      ...item,
-      file: (
-        <>
-          <p hidden>{item.file}</p>
-        </>
-      ), // Embedding the file link in img tag
-    }));
- 
-    setData(sortedData); // Update the table data state with the updated data
-    closeEditModal(); // Close the edit modal after successful update
-  } catch (error) {
-    createToast("Error updating user information", "error");
-  }
-
-  // navigate("/account-activation-by-otp");
-};
-
+    // navigate("/account-activation-by-otp");
+  };
 
   useEffect(() => {
     if (taskmessage) {
       createToast(taskmessage, "success");
       dispatch(setEmptyTaskMessage());
-      setIsEditModalOpen(false);
+      closeEditModal();
     }
     if (taskerror) {
       createToast(taskerror);
@@ -107,18 +103,18 @@ const TaskDatatable = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await API.get(
-          `/api/v1/task/${user._id}`
-        );
-        const sortedData = response.data.userTask.task.reverse().map((item) => ({
-          ...item,
-          file: (
-            <>
-              <p hidden>{item.file}</p>
-            </>
-          ), // Embedding the file link in img tag
-        }));
-     
+        const response = await API.get(`/api/v1/task/${user._id}`);
+        const sortedData = response.data.userTask.task
+          .reverse()
+          .map((item) => ({
+            ...item,
+            file: (
+              <>
+                <p hidden>{item.file}</p>
+              </>
+            ), // Embedding the file link in img tag
+          }));
+
         setData(sortedData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -253,6 +249,28 @@ const TaskDatatable = () => {
     data,
   });
 
+  const formattedDate = useMemo(() => {
+    if (input.date) {
+      const [year, month, day] = input.date.split("-");
+      const months = [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ];
+      return `${day}-${months[parseInt(month) - 1]}-${year}`;
+    }
+    return ""; // Return an empty string if input.date is not available
+  }, [input.date]);
+
   return (
     <>
       <MaterialReactTable table={table} />
@@ -266,17 +284,17 @@ const TaskDatatable = () => {
       >
         <Modal.Header closeButton></Modal.Header>
         <Modal.Body>
-        <div>
-                    {pdfUrl && (
-                      <div className="pdf-container">
-                        <embed
-                          src={pdfUrl}
-                          type="application/pdf"
-                          className="pdf-embed"
-                        />
-                      </div>
-                    )}
-                  </div>
+          <div>
+            {pdfUrl && (
+              <div className="pdf-container">
+                <embed
+                  src={pdfUrl}
+                  type="application/pdf"
+                  className="pdf-embed"
+                />
+              </div>
+            )}
+          </div>
         </Modal.Body>
       </Modal>
 
@@ -293,7 +311,7 @@ const TaskDatatable = () => {
         <Modal.Header closeButton>
           <Modal.Title>
             {" "}
-            <h5>Incoming File Send</h5>{" "}
+            <h5>Task Details</h5>{" "}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ color: "black" }}>
@@ -411,7 +429,7 @@ const TaskDatatable = () => {
                       type="text"
                       placeholder="Date"
                       name="date"
-                      value={input.date}
+                      value={formattedDate}
                       onChange={handleInputChange}
                       disabled
                       style={{ backgroundColor: "lightyellow" }}
@@ -456,9 +474,7 @@ const TaskDatatable = () => {
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
                       <option value="44957">{input.assigned}</option>
-                   
                     </Form.Select>
                   </Form.Group>
 
@@ -499,9 +515,8 @@ const TaskDatatable = () => {
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
+                      <option value="Choose">Choose...</option>
                       <option value="pending">Pending</option>
-                      <option value="ongoing">Ongoing</option>
                       <option value="completed">Completed</option>
                     </Form.Select>
                   </Form.Group>

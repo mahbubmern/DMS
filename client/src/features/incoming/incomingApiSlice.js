@@ -6,6 +6,7 @@ import API from "../../utils/api";
 export const createIncoming = createAsyncThunk(
   "incoming/createIncoming",
   async (data) => {
+
     try {
       const response = await API.post(`/api/v1/incoming`, data);
 
@@ -51,6 +52,7 @@ export const getIncomings = createAsyncThunk(
 export const editIncomings = createAsyncThunk(
   "user/editIncomings",
   async (data) => {
+
     try {
       const response = await API.patch(`/api/v1/incoming/${data._id}`, data);
 

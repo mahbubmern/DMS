@@ -306,7 +306,6 @@ const Datatables = () => {
     name: "",
     email: "",
     role: "",
-    state: "", // Add state field to the initial state
     status: "", // Add status field to the initial state
   });
 
@@ -321,17 +320,21 @@ const Datatables = () => {
 
   const handleEditUserModalForm = async (e) => {
     e.preventDefault();
-    const { name, index, role, status, state, _id } = input;
-    const formData = { name, index, role, status: status === "true", state, _id }; // Convert status to boolean
+    const { name, index, role, status, _id } = input;
+    console.log(role, status);
+    const formData = {
+      name,
+      index,
+      role,
+      status,
+      _id,
+    }; // Convert status to boolean
     // Dispatch the updateUser action
     await dispatch(updateUser(formData));
     // Fetch the updated data from the server
     try {
       const response = await API.get("/api/v1/user");
-      const sortedData = response.data.user.reverse().map((user) => ({
-        ...user,
-        status: user.status ? "Active" : "Blocked", // Assuming "status" is a boolean field, converting it to "Active" or "Blocked" string
-      }));
+      const sortedData = response.data.user.reverse();
       setData(sortedData); // Update the table data state with the updated data
       closeEditModal(); // Close the edit modal after successful update
     } catch (error) {
@@ -364,10 +367,7 @@ const Datatables = () => {
     const fetchData = async () => {
       try {
         const response = await API.get("/api/v1/user");
-        const sortedData = response.data.user.reverse().map((user) => ({
-          ...user,
-          status: user.status ? "Active" : "Blocked", // Assuming "status" is a boolean field, converting it to "Active" or "Blocked" string
-        }));
+        const sortedData = response.data.user.reverse();
         setData(sortedData);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -401,9 +401,13 @@ const Datatables = () => {
         Cell: ({ row }) => (
           <>
             {row.original.role === "admin" ? (
-              <Badge bg="warning" style={{textTransform : 'Capitalize'}}>{row.original.role}</Badge>
+              <Badge bg="warning" style={{ textTransform: "Capitalize" }}>
+                {row.original.role}
+              </Badge>
             ) : (
-              <Badge bg="info" style={{textTransform : 'Capitalize'}}>{row.original.role}</Badge>
+              <Badge bg="info" style={{ textTransform: "Capitalize" }}>
+                {row.original.role}
+              </Badge>
             )}
           </>
         ),
@@ -429,17 +433,15 @@ const Datatables = () => {
         Cell: ({ row }) => (
           <>
             <a
-                  onClick={() => handleView(row)}
-                  className="btn btn-sm bg-success-light"
-                
-                >
-                  <i className="fe fe-eye"></i> View
-                </a>
+              onClick={() => handleView(row)}
+              className="btn btn-sm bg-success-light"
+            >
+              <i className="fe fe-eye"></i> View
+            </a>
             &nbsp;
-          
             {user.role === "admin" && (
               <a
-              onClick={() => handleEdit(row)}
+                onClick={() => handleEdit(row)}
                 className="btn btn-sm bg-warning-light"
               >
                 <i className="fe fe-pencil"></i> Edit
@@ -512,8 +514,8 @@ const Datatables = () => {
           )}
         </Modal.Body>
         <Modal.Footer>
-          <a className="btn btn-sm bg-danger-light" onClick={closeModal}  >
-           <i className="fe fe-close"></i> Close
+          <a className="btn btn-sm bg-danger-light" onClick={closeModal}>
+            <i className="fe fe-close"></i> Close
           </a>
         </Modal.Footer>
       </Modal>
@@ -634,21 +636,20 @@ const Datatables = () => {
                 </Form.Group>
 
                 <Row className="mb-3">
-                  <Form.Group as={Col} controlId="formGridRole">
+                  {/* <Form.Group as={Col} controlId="formGridRole">
                     <Form.Label>
                       Role : <span style={{ color: "red" }}>{input.role}</span>
                     </Form.Label>
-                  </Form.Group>
+                  </Form.Group> */}
 
                   <Form.Group as={Col} controlId="formGridState">
-                    <Form.Label>Change State</Form.Label>
+                    <Form.Label>Change Role</Form.Label>
                     <Form.Select
-                      name="state"
-                      value={input.state}
+                      name="role"
+                      value={input.role}
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
                       <option value="user">User</option>
                       <option value="admin">Admin</option>
                     </Form.Select>
@@ -662,15 +663,19 @@ const Datatables = () => {
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
-                      <option value={true} >Active</option>
-                      <option value={false}>Block</option>
+                      <option value="Active">Active</option>
+                      <option value="Blocked">Block</option>
                     </Form.Select>
                   </Form.Group>
                 </Row>
-              
-                <Button variant="primary" type="submit" className="btn btn-sm bg-success-light w-100">
-                <i className="fe fe-check"></i>  {loader ? "Updating..." : "Update User"}
+
+                <Button
+                  variant="primary"
+                  type="submit"
+                  className="btn btn-sm bg-success-light w-100"
+                >
+                  <i className="fe fe-check"></i>{" "}
+                  {loader ? "Updating..." : "Update User"}
                 </Button>
               </Form>
               {/* <p>Name: {editSelectedUser.name}</p>

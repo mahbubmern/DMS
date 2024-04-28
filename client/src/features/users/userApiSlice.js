@@ -18,6 +18,8 @@ export const getAllUser = createAsyncThunk("user/getAllUser", async () => {
 // Update user
 
 export const updateUser = createAsyncThunk("user/updateUser", async (data) => {
+
+
   try {
     const response = await API.patch(`/api/v1/user/${data._id}`, data);
 

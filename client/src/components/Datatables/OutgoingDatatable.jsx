@@ -167,17 +167,17 @@ const OutgoingDatatable = () => {
         header: "Category",
         size: 100,
       },
-      {
-        accessorKey: "assigned",
-        header: "Assign",
-        size: 150,
-      },
+      // {
+      //   accessorKey: "assigned",
+      //   header: "Assign",
+      //   size: 150,
+      // },
 
-      {
-        accessorKey: "instruction",
-        header: "Instruction",
-        size: 100,
-      },
+      // {
+      //   accessorKey: "instruction",
+      //   header: "Instruction",
+      //   size: 100,
+      // },
       {
         accessorKey: "status",
         header: "Status",
@@ -209,7 +209,7 @@ const OutgoingDatatable = () => {
             >
               <i className="fe fe-eye"></i> View File
             </a>
-            &nbsp;
+            {/* &nbsp;
             {user.role === "admin" && (
               <a
                 className="btn btn-sm bg-warning-light"
@@ -217,7 +217,7 @@ const OutgoingDatatable = () => {
               >
                 <i className="fe fe-pencil"></i> Edit
               </a>
-            )}
+            )} */}
           </>
         ),
       },

@@ -38,6 +38,18 @@ export const sendTask = asyncHandler(async (req, res) => {
   const { assigned, deadLine, priority, status, instruction, progress, _id } =
     req.body;
 
+
+  if (assigned == undefined || assigned == "choose") {
+    return res.status(400).json({
+      message: "Plese Select Assigee",
+    });
+  }
+
+  if (priority == null || priority == "choose") {
+    return res.status(400).json({
+      message: "Plese Select Priority",
+    });
+  }
   const nameSplit = assigned.split("-");
 
   // Check if required fields are provided
@@ -79,6 +91,12 @@ export const updateTask = asyncHandler(async (req, res) => {
   if (!status || !progress) {
     return res.status(400).json({
       message: "Some Fields are Required",
+    });
+  }
+
+  if (status == undefined || status == "Choose") {
+    return res.status(400).json({
+      message: "Please Select Status",
     });
   }
 

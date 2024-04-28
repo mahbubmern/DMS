@@ -22,7 +22,11 @@ import { sendSMS } from "../mails/sendSMS.js";
  * @route : '/api/v1/auth/register'
  */
 export const registerUser = asyncHandler(async (req, res) => {
-  const { index, name, email, password } = req.body;
+  const { role, index, name, email, password } = req.body;
+
+  if (role === undefined || role == "select") {
+    return res.status(400).json({ message: "Please select role" });
+  }
 
   //check all fields
 
@@ -49,9 +53,9 @@ export const registerUser = asyncHandler(async (req, res) => {
   if (checkExistingUser) {
     return res.status(400).json({
       message:
-        checkExistingUser.email == email
-          ? "Email Already Exists"
-          : "Index User Already Exists",
+        checkExistingUser.index == index
+          ?  "Index User Already Exists"
+          : "Email Already Exists",
     });
   }
 
@@ -64,28 +68,59 @@ export const registerUser = asyncHandler(async (req, res) => {
   //Hash Password
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const createdUser = await Users.create({
-    index,
-    name,
-    email,
-    password: hashPassword,
-    accessToken: otp,
-  });
 
-  if (createdUser) {
-    //send activationToken to cookie
-    const activationToken = jwt.sign({ index }, process.env.JWT_SECRET, {
-      expiresIn: "15min",
+  if (role === "admin") {
+    if (!role || !index || !name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    const createdUser = await Users.create({
+      index,
+      name,
+      email,
+      role,
+      password: hashPassword,
+      accessToken: otp,
     });
 
-    res.cookie("activationToken", activationToken);
+    if (createdUser) {
+      //send activationToken to cookie
+      const activationToken = jwt.sign({ index }, process.env.JWT_SECRET, {
+        expiresIn: "15min",
+      });
 
-    await AccountVerifyMail(email, { otp: otp, link: "" });
+      res.cookie("activationToken", activationToken);
+
+      await AccountVerifyMail(email, { otp: otp, link: "" });
+    }
+
+    res
+      .status(201)
+      .json({ user: createdUser, message: "User registration Successful" });
+  } else {
+    const createdUser = await Users.create({
+      index,
+      name,
+      email,
+      password: hashPassword,
+      accessToken: otp,
+    });
+
+    if (createdUser) {
+      //send activationToken to cookie
+      const activationToken = jwt.sign({ index }, process.env.JWT_SECRET, {
+        expiresIn: "15min",
+      });
+
+      res.cookie("activationToken", activationToken);
+
+      await AccountVerifyMail(email, { otp: otp, link: "" });
+    }
+
+    res
+      .status(201)
+      .json({ user: createdUser, message: "User registration Successful" });
   }
-
-  res
-    .status(201)
-    .json({ user: createdUser, message: "User registration Successful" });
 });
 
 //===========================================================

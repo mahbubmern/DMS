@@ -9,59 +9,59 @@ import {
 
 const initialState = {
   incomingFile: null,
-  message: null,
-  error: null,
-  loader: false,
+  incomingMessage: null,
+  incomingError: null,
+  incomingLoader: false,
 };
 
 const incomingSlice = createSlice({
   name: "incoming",
   initialState,
   reducers: {
-    setEmptyMessage: (state) => {
-      (state.message = null), (state.error = null);
+    setEmptyIncomingMessage: (state) => {
+      (state.incomingMessage = null), (state.incomingError = null);
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(createIncoming.pending, (state) => {
-        state.loader = true;
+        state.incomingLoader = true;
       })
       .addCase(createIncoming.fulfilled, (state, action) => {
-        state.loader = false;
+        state.incomingLoader = false;
         state.incomingFile = action.payload.incomingFile;
-        state.message = action.payload.message;
+        state.incomingMessage = action.payload.message;
       })
       .addCase(createIncoming.rejected, (state, action) => {
-        state.loader = false;
-        state.error = action.error.message;
+        state.incomingLoader = false;
+        state.incomingError = action.error.message;
       })
       // get All Incomings
       .addCase(getIncomings.pending, (state) => {
-        state.loader = true;
+        state.incomingLoader = true;
       })
       .addCase(getIncomings.fulfilled, (state, action) => {
-        state.loader = false;
+        state.incomingLoader = false;
         state.incomingFile = action.payload;
-        state.message = action.payload.message;
+        state.incomingMessage = action.payload.message;
       })
       .addCase(getIncomings.rejected, (state, action) => {
-        state.loader = false;
-        state.error = action.error.message;
+        state.incomingLoader = false;
+        state.incomingError = action.error.message;
       })
 
       // Update Incomings file
       .addCase(editIncomings.pending, (state) => {
-        state.loader = true;
+        state.incomingLoader = true;
       })
       .addCase(editIncomings.fulfilled, (state, action) => {
-        state.loader = false;
+        state.incomingLoader = false;
         state.incomingFile = action.payload.incomingFile;
-        state.message = action.payload.message;
+        state.incomingMessage = action.payload.message;
       })
       .addCase(editIncomings.rejected, (state, action) => {
-        state.loader = false;
-        state.error = action.error.message;
+        state.incomingLoader = false;
+        state.incomingError = action.error.message;
       });
   },
 });
@@ -72,7 +72,7 @@ export const incomingSelector = (state) => state.incoming;
 
 //actions export
 
-export const { setEmptyMessage } = incomingSlice.actions;
+export const { setEmptyIncomingMessage } = incomingSlice.actions;
 
 //reducer export
 

@@ -11,6 +11,7 @@ import userPassRoute from "./routes/userPassRoute.js";
 import userPersonalRoute from "./routes/userPersonalRoute.js";
 import userPhotoRoute from "./routes/userPhotoRoute.js";
 import todoRoute from "./routes/todoRoute.js";
+import categoryRoute from "./routes/categoryRoute.js";
 import notificationRoute from "./routes/notificationRoute.js";
 import errorHandler from "./middleware/errorHandler.js";
 import cookieParser from "cookie-parser";
@@ -50,6 +51,7 @@ app.use("/api/v1/userpersonal", userPersonalRoute);
 app.use("/api/v1/userphoto", userPhotoRoute);
 app.use("/api/v1/todo", todoRoute);
 app.use("/api/v1/notification", notificationRoute);
+app.use("/api/v1/category", categoryRoute);
 
 //error handler
 app.use(errorHandler);

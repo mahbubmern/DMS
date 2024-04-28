@@ -51,6 +51,33 @@ const IncomingDatatable = () => {
     }));
   };
 
+  const formattedDate = useMemo(() => {
+    if (input.date) {
+      const [year, month, day] = input.date.split('-');
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${day}-${months[parseInt(month) - 1]}-${year}`;
+    }
+    return ''; // Return an empty string if input.date is not available
+  }, [input.date]);
+
+
+
+  const [currentDate, setCurrentDate] = useState("");
+
+  useEffect(() => {
+    const todaysDate = new Date();
+    const formattedDate = `${todaysDate.getFullYear()}-${(
+      todaysDate.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${todaysDate.getDate().toString().padStart(2, "0")}`;
+    setCurrentDate(formattedDate);
+  }, []);
+
+  const handleDateChange = (e) => {
+    setCurrentDate(e.target.value);
+  };
+
   const handleSendIncomingModalForm = async (e) => {
     e.preventDefault();
     const {
@@ -76,7 +103,7 @@ const IncomingDatatable = () => {
       category,
       file,
       assigned,
-      deadLine,
+      deadLine :  currentDate,
       priority,
       status,
       instruction,
@@ -101,10 +128,12 @@ const IncomingDatatable = () => {
         ), // Assuming "status" is a boolean field, converting it to "Active" or "Blocked" string
       }));
       setData(sortedData); // Update the table data state with the updated data
-      closeEditModal(); // Close the edit modal after successful update
+      closeEditModal();// Close the edit modal after successful update
     } catch (error) {
       createToast("Error updating user information", "error");
     }
+
+  
 
     // navigate("/account-activation-by-otp");
   };
@@ -113,6 +142,7 @@ const IncomingDatatable = () => {
     if (message) {
       createToast(message, "success");
       dispatch(setEmptyMessage());
+      
       setIsEditModalOpen(false);
     }
     if (error) {
@@ -127,6 +157,8 @@ const IncomingDatatable = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State to control the visibility of the modal
   const [editSelectedFile, setEditSelectedFile] = useState(null); // State to control the visibility of the modal
   const [assignee, setAssignee] = useState(null);
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -147,7 +179,7 @@ const IncomingDatatable = () => {
     };
 
     fetchData();
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -160,7 +192,7 @@ const IncomingDatatable = () => {
     };
 
     fetchUsers();
-  }, []);
+  }, [dispatch]);
 
   const columns = useMemo(
     () => [
@@ -410,6 +442,7 @@ const IncomingDatatable = () => {
                   controlId="formGridId"
                   disable
                   readOnly
+                  hidden
                 >
                   <Form.Label>User ID</Form.Label>
                   <Form.Control
@@ -470,7 +503,7 @@ const IncomingDatatable = () => {
                       type="text"
                       placeholder="Date"
                       name="date"
-                      value={input.date}
+                      value={formattedDate}
                       onChange={handleInputChange}
                       readOnly
                       style={{ backgroundColor: "lightyellow" }}
@@ -507,14 +540,14 @@ const IncomingDatatable = () => {
                   </Form.Group>
 
                   <Form.Group as={Col} controlId="formGridAssign">
-                    <Form.Label>Assigned</Form.Label>
+                    <Form.Label>Assigned  </Form.Label> <span style={{color : 'red', fontSize : '20px' , verticalAlign : 'middle'}}>***</span>
                     <Form.Select
                       name="assigned"
                       value={input.assigned || ""}
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
+                      <option value="choose"> Choose...</option>
                       {assignee.map((item) => (
                         <option
                           key={item.id}
@@ -525,12 +558,12 @@ const IncomingDatatable = () => {
                   </Form.Group>
 
                   <Form.Group as={Col} controlId="formGridDeadLine">
-                    <Form.Label>Dead Line</Form.Label>
+                    <Form.Label>Dead Line</Form.Label> <span style={{color : 'red', fontSize : '20px' , verticalAlign : 'middle'}}>***</span>
                     <Form.Control
                       type="date"
                       name="deadLine"
-                      value={input.deadLine}
-                      onChange={handleInputChange}
+                      value={currentDate}
+                      onChange={handleDateChange}
                       style={{ backgroundColor: "lightyellow" }}
                     />
                   </Form.Group>
@@ -538,20 +571,20 @@ const IncomingDatatable = () => {
 
                 <Row className="mb-3">
                   <Form.Group as={Col} controlId="formGridPriority">
-                    <Form.Label>Priority</Form.Label>
+                    <Form.Label>Priority</Form.Label> <span style={{color : 'red', fontSize : '20px' , verticalAlign : 'middle'}}>***</span>
                     <Form.Select
                       name="priority"
                       value={input.priority || ""}
                       onChange={handleSelectChange}
                       style={{ backgroundColor: "lightyellow" }}
                     >
-                      <option>Choose...</option>
+                      <option value="choose">Choose...</option>
                       <option value="urgent">Urgent</option>
                       <option value="normal">Normal</option>
                     </Form.Select>
                   </Form.Group>
 
-                  <Form.Group as={Col} controlId="formGridStatus">
+                  {/* <Form.Group as={Col} controlId="formGridStatus">
                     <Form.Label>Status</Form.Label>
                     <Form.Select
                       name="status"
@@ -564,10 +597,7 @@ const IncomingDatatable = () => {
                       <option value="ongoing">Ongoing</option>
                       <option value="completed">Completed</option>
                     </Form.Select>
-                  </Form.Group>
-                </Row>
-
-                <Row className="mb-3">
+                  </Form.Group> */}
                   <Form.Group as={Col} controlId="exampleForm.ControlTextarea1">
                     <Form.Label>Instruction</Form.Label>
                     <Form.Control
@@ -579,6 +609,10 @@ const IncomingDatatable = () => {
                       style={{ backgroundColor: "lightyellow" }}
                     />
                   </Form.Group>
+                </Row>
+
+                {/* <Row className="mb-3">
+                  
 
                   <Form.Group as={Col} controlId="exampleForm.ControlTextarea2">
                     <Form.Label>Working Progress</Form.Label>
@@ -591,7 +625,7 @@ const IncomingDatatable = () => {
                       style={{ backgroundColor: "lightyellow" }}
                     />
                   </Form.Group>
-                </Row>
+                </Row> */}
 
                 <Button
                   variant="primary"

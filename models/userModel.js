@@ -63,7 +63,6 @@ const userSchema = mongoose.Schema(
     role: {
       type: String,
       default: "user",
-      enum: ["user", "admin", "superAdmin"],
     },
 
     accessToken: {
@@ -86,8 +85,8 @@ const userSchema = mongoose.Schema(
     },
 
     status: {
-      type: Boolean,
-      default: true,
+      type: String,
+      default: "Active",
     },
 
     trash: {

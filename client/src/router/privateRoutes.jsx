@@ -35,7 +35,7 @@ export const privateRoutes = [
             element: <Outgoing />,
           },
           {
-            path: "/dashboard/profile",
+            path: "/dashboard/settings",
             element: <Profile />,
           },
           {

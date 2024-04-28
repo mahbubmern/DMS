@@ -27,7 +27,6 @@ export const getAllIncomings = asyncHandler(async (req, res) => {
     .json({ incomingFile, message: "Incoming Letter Found Successful" });
 });
 
-
 /**
  * @description : get all Pending Letter
  * @method : GET
@@ -36,10 +35,11 @@ export const getAllIncomings = asyncHandler(async (req, res) => {
  */
 export const getAllPendings = asyncHandler(async (req, res) => {
   const pendingFile = await Incomings.find()
-    .where('status').equals('pending')
-    .where('assigned').ne(null); 
+    .where("status")
+    .equals("pending")
+    .where("assigned")
+    .ne(null);
 
- 
   //check Incoming Letter
   if (pendingFile.length === 0) {
     return res.status(404).json({ message: "No Pending Letter Found" });
@@ -119,14 +119,22 @@ export const createIncoming = asyncHandler(async (req, res) => {
 //  */
 export const updateIncomingFile = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const {
-    assigned,
-    deadLine,
-    priority,
-    status,
-    instruction,
-    progress,
-  } = req.body;
+  const { assigned, deadLine, priority, status, instruction, progress } =
+    req.body;
+
+
+
+  if (assigned == undefined || assigned == "choose") {
+    return res.status(400).json({
+      message: "Plese Select Assigee",
+    });
+  }
+
+  if (priority == null || priority == "choose") {
+    return res.status(400).json({
+      message: "Plese Select Priority",
+    });
+  }
 
   // Check if required fields are provided
   if (!assigned || !deadLine || !priority) {
@@ -134,7 +142,6 @@ export const updateIncomingFile = asyncHandler(async (req, res) => {
       message: "Some Fields are Required",
     });
   }
-
 
     // Check if the file exists
     const existingFile = await Incomings.findById(id);

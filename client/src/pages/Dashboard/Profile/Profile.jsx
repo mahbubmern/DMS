@@ -198,7 +198,9 @@ const Profile = () => {
                         url={user.photo && user.photo}
                       />
                     </a>
+                    
                   </div>
+                  
                   <div className="col ml-md-n2 profile-user-info">
                     <h4 className="user-name mb-0">{user.name}</h4>
                     <h6 className="text-muted">{user.email}</h6>
@@ -211,15 +213,19 @@ const Profile = () => {
                       )}
                     </div>
                   </div>
+                  
                   <div className="col-auto profile-btn">
-                    <button
+                   
+                  </div>
+                 
+                </div>
+                <br />
+                <button
                       onClick={modalOpen}
                       className="btn btn bg-success-light"
                     >
-                      Edit
+                      Change Profile Photo
                     </button>
-                  </div>
-                </div>
               </div>
 
               {/* Photo Modal Start */}
@@ -313,15 +319,16 @@ const Profile = () => {
                     <div className="col-lg-12">
                       <div className="card">
                         <div className="card-body">
-                          <h5 className="card-title d-flex justify-content-between">
-                            <span>Personal Details</span>
-                            <button
+                          <h5 className="card-title d-flex">
+                            <span>Personal Details &nbsp; &nbsp; <button
                               onClick={personalEditModalOpen}
                               className="btn btn bg-success-light"
                             >
-                              Edit
-                            </button>
+                              Add More Details
+                            </button></span> 
+                           
                           </h5>
+                          <br />
                           <div className="row">
                             <p className="col-sm-2 text-muted">Name</p>
                             <p className="col-sm-10">{user.name}</p>
@@ -403,7 +410,7 @@ const Profile = () => {
                         size="md"
                         aria-labelledby="example-modal-sizes-title-md"
                       >
-                        <Modal.Header closeButton></Modal.Header>
+                        <Modal.Header closeButton> <h6>Fill up Your Official Data</h6></Modal.Header>
                         <Modal.Body>
                           <form onSubmit={handlePersonalDetailForm}>
                             <div className="row">

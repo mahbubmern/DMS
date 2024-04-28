@@ -10,22 +10,44 @@ import Form from "react-bootstrap/Form";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 import { useEffect, useRef, useState } from "react";
-import { useForm } from "../../../hooks/useForm";
+// import { useForm } from "../../../hooks/useForm";
 import { useDispatch, useSelector } from "react-redux";
 import createToast from "../../../utils/createToast";
 import { createIncoming } from "../../../features/incoming/incomingApiSlice";
 import {
   incomingSelector,
-  setEmptyMessage,
+  setEmptyIncomingMessage,
 } from "../../../features/incoming/incomingSlice";
-
+import { authSelector } from "../../../features/auth/authSlice";
+import API from "../../../utils/api";
 
 const Incoming = () => {
   const dispatch = useDispatch();
-  const { loader, error, message } = useSelector(incomingSelector);
+  const { incomingError, incomingMessage } = useSelector(incomingSelector);
+  const { user, loader, error, message } = useSelector(authSelector);
   // const pdfUrl = "https://example.com/path/to/your/file.pdf";
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState("");
 
+  // category modal state
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+
+  useEffect(() => {
+    const todaysDate = new Date();
+    const formattedDate = `${todaysDate.getFullYear()}-${(
+      todaysDate.getMonth() + 1
+    )
+      .toString()
+      .padStart(2, "0")}-${todaysDate.getDate().toString().padStart(2, "0")}`;
+    setCurrentDate(formattedDate);
+    
+  }, []);
+
+ 
+
+  const handleDateChange = (e) => {
+    setCurrentDate(e.target.value);
+  };
   // form Data init
 
   const [input, setInput] = useState({
@@ -33,7 +55,6 @@ const Incoming = () => {
     ref: "",
     date: "",
     subject: "",
-    category: "",
     file: null, // Initialize file as null
   });
   const fileInputRef = useRef(null);
@@ -74,35 +95,33 @@ const Incoming = () => {
     const formData = new FormData();
     formData.append("from", input.from);
     formData.append("ref", input.ref);
-    formData.append("date", input.date);
+    formData.append("date", currentDate);
     formData.append("subject", input.subject);
-    formData.append("category", input.category);
+    formData.append("category", categoryInput.category);
     formData.append("file", input.file); // Append file to form data
 
     dispatch(createIncoming(formData));
     fileInputRef.current.value = "";
     setPdfUrl(null);
-    
   };
 
   useEffect(() => {
-    if (message) {
-      createToast(message, "success");
-      dispatch(setEmptyMessage());
+    if (incomingMessage) {
+      createToast(incomingMessage, "success");
+      dispatch(setEmptyIncomingMessage());
       setInput({
         from: "",
         ref: "",
         date: "",
         subject: "",
-        category: "",
         file: null, // Reset file object
       });
     }
-    if (error) {
-      createToast(error);
-      dispatch(setEmptyMessage());
+    if (incomingError) {
+      createToast(incomingError);
+      dispatch(setEmptyIncomingMessage());
     }
-  }, [message, error, dispatch]);
+  }, [incomingMessage, incomingError, dispatch]);
 
   // handle pdf file
   // const handleFileChange = (event) => {
@@ -123,6 +142,57 @@ const Incoming = () => {
     // Close the modal
     setIsModalOpen(false);
   };
+
+  const [categoryInput, setCategoryInput] = useState({ category: "" }); // State to hold category input
+
+  // Function to handle changes in the category input
+  const handleCategoryChange = (e) => {
+    setCategoryInput({ ...categoryInput, [e.target.name]: e.target.value });
+  };
+  // handle add category modal
+
+  const handleCategoryAdd = () => {
+    setCategoryModalOpen(true);
+  };
+
+  const closeCategoryModal = () => {
+    setCategoryModalOpen(false);
+  };
+
+  // category form submit
+
+  const handleCategoryForm = async (e) => {
+    e.preventDefault();
+
+    try {
+      // Send only the category value, not the entire categoryInput object
+      await API.post("/api/v1/category", { category: categoryInput.category });
+      createToast("Category Created Successful", "success");
+    } catch (error) {
+      console.error("Error to Create:", error);
+      
+    }
+    setCategoryInput({
+      category: "",
+    });
+  };
+
+  const [cate, setCate] = useState([]);
+
+  useEffect(() => {
+    const fetchCategoryList = async () => {
+      try {
+        // Send only the category value, not the entire categoryInput object
+        const response = await API.get("/api/v1/category");
+        setCate(response.data.reverse());
+      } catch (error) {
+        console.error("Error to Fetch:", error);
+        
+      }
+    };
+
+    fetchCategoryList();
+  }, []);
 
   return (
     <>
@@ -171,7 +241,10 @@ const Incoming = () => {
         size="lg"
         aria-labelledby="example-modal-sizes-title-lg"
       >
-        <Modal.Header closeButton></Modal.Header>
+        <Modal.Header closeButton>
+          {" "}
+          <h6>Incoming Letter</h6>{" "}
+        </Modal.Header>
         <Modal.Body>
           <Form onSubmit={handleIncomingFile} encType="multipart/form-data">
             <Row className="mb-3">
@@ -188,10 +261,10 @@ const Incoming = () => {
               </Form.Group>
 
               <Form.Group as={Col} controlId="formGridIndex">
-                <Form.Label>Refference</Form.Label>
+                <Form.Label>Reference</Form.Label>
                 <Form.Control
                   type="text"
-                  placeholder="Refference"
+                  placeholder="Reference"
                   name="ref"
                   value={input.ref}
                   onChange={handleInputChange}
@@ -204,8 +277,8 @@ const Incoming = () => {
                 <Form.Control
                   type="date"
                   name="date"
-                  value={input.date}
-                  onChange={handleInputChange}
+                  value={currentDate}
+                  onChange={handleDateChange}
                   style={{ backgroundColor: "lightyellow" }}
                 />
               </Form.Group>
@@ -225,15 +298,33 @@ const Incoming = () => {
 
             <Row className="mb-3">
               <Form.Group as={Col} controlId="formGridIndex">
-                <Form.Label>Category</Form.Label>
-                <Form.Control
-                  type="text"
-                  placeholder="Category"
+                <Form.Label>
+                  Category &nbsp;{" "}
+                  {user.role == "admin" ? (
+                    <span
+                      className="btn btn-sm bg-success-light"
+                      onClick={handleCategoryAdd}
+                    >
+                      Add New Category
+                    </span>
+                  ) : (
+                    ""
+                  )}{" "}
+                </Form.Label>
+                <Form.Select
                   name="category"
-                  value={input.category}
-                  onChange={handleInputChange}
+                  value={categoryInput.category}
+                  onChange={handleCategoryChange}
                   style={{ backgroundColor: "lightyellow" }}
-                />
+                >
+                  <option value="">-Select-</option>
+                  {cate &&
+                    cate.map((item, index) => (
+                      <option key={index} value={item}>
+                        {item}
+                      </option>
+                    ))}
+                </Form.Select>
               </Form.Group>
 
               <Form.Group as={Col} controlId="formGridIndex">
@@ -265,14 +356,49 @@ const Incoming = () => {
               )}
             </div>
 
-            <Button variant="primary" type="submit" className="w-100">
-              Add
+            <Button type="submit" className="btn btn-sm bg-success-light w-100">
+              Submit
             </Button>
           </Form>
         </Modal.Body>
         {/* Render PDFViewer component only if pdfUrl is not null */}
         {/* {pdfUrl && <PDFViewer pdfUrl={pdfUrl} />} */}
       </Modal>
+
+      {/* add category Modal start */}
+
+      <Modal
+        show={categoryModalOpen}
+        onHide={closeCategoryModal}
+        size="sm"
+        aria-labelledby="example-modal-sizes-title-lg"
+      >
+        <Modal.Header closeButton>
+          {" "}
+          <h6>Add Category</h6>{" "}
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleCategoryForm}>
+            <Form.Group className="mb-3" controlId="formGridId">
+              <Form.Label>Category</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Category"
+                name="category"
+                value={categoryInput.category}
+                onChange={handleCategoryChange}
+                style={{ backgroundColor: "lightyellow" }}
+              />
+            </Form.Group>
+            <Button type="submit" className="btn btn-sm bg-success-light w-100">
+              Add Category
+            </Button>
+          </Form>
+        </Modal.Body>
+        {/* Render PDFViewer component only if pdfUrl is not null */}
+        {/* {pdfUrl && <PDFViewer pdfUrl={pdfUrl} />} */}
+      </Modal>
+      {/* add category Modal end */}
     </>
   );
 };

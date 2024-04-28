@@ -79,12 +79,12 @@ const Layout = () => {
         <div className="header">
           {/* Logo */}
           <div className="header-left">
-            <a href="#" className="logo">
+            <Link to="/dashboard" className="logo">
               <img src={logo} alt="Logo" />
-            </a>
-            <a href="#" className="logo logo-small">
+            </Link>
+            <Link to="/dashboard" className="logo logo-small">
               <img src={logo} alt="Logo" width={30} height={30} />
-            </a>
+            </Link>
           </div>
           {/* /Logo */}
           <a href="javascript:void(0);" id="toggle_btn">
@@ -118,9 +118,9 @@ const Layout = () => {
                 onClick={handleDropdownToggle}
               >
                 <i className="fe fe-bell" />{" "}
-                {isDropdownOpen && unReadCount > 0 && (
-                  <span className="badge rounded-pill">{unReadCount}</span>
-                )}
+                {isDropdownOpen && unReadCount > 0 ? (
+                  <span className="badge rounded-pill">{unReadCount} Pending Task</span> ) : ''
+                }
               </a>
               <div className="dropdown-menu notifications">
                 <div className="topnav-dropdown-header">
@@ -209,9 +209,9 @@ const Layout = () => {
                     <p className="text-muted mb-0">{user.role}</p>
                   </div>
                 </div>
-                <Link className="dropdown-item" to="/dashboard/profile">
+                {/* <Link className="dropdown-item" to="/dashboard/profile">
                   My Profile
-                </Link>
+                </Link> */}
                 {/* <a className="dropdown-item" href="settings.html">
                   Settings
                 </a> */}
@@ -234,9 +234,9 @@ const Layout = () => {
           <div className="sidebar-inner slimscroll">
             <div id="sidebar-menu" className="sidebar-menu">
               <ul>
-                <li className="menu-title">
+                {/* <li className="menu-title">
                   <span>Main</span>
-                </li>
+                </li> */}
                 <li>
                   <Link
                     to="/dashboard"
@@ -302,22 +302,22 @@ const Layout = () => {
 
                 <li>
                   <Link
-                    to="/dashboard/profile"
+                    to="/dashboard/settings"
                     onClick={() => handleItemClick("profile")}
                     style={{
                       backgroundColor:
                         activeItem === "profile" ? "#00d0f1" : "",
                     }}
                   >
-                    <i className="fe fe-user-plus" /> <span>Profile</span>
+                    <i className="fe fe-user-plus" /> <span>Settings</span>
                   </Link>
                 </li>
 
-                <li>
+                {/* <li>
                   <Link to="/login" onClick={handleLogout}>
                     <i className="fas fa-sign-out-alt" /> <span>Logout</span>
                   </Link>
-                </li>
+                </li> */}
               </ul>
             </div>
           </div>

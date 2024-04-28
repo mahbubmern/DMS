@@ -163,10 +163,12 @@ export const createUser = asyncHandler(async (req, res) => {
 export const updateUser = asyncHandler(async (req, res) => {
   const { id } = req.params;
 
-  const { name, index, role, status, state } = req.body;
+  const { name, index, role, status } = req.body;
 
   // check user exists
   const ExistsUSer = await Users.findOne({ _id: id });
+
+
 
   if (!ExistsUSer) {
     return res.status(400).json({
@@ -176,7 +178,7 @@ export const updateUser = asyncHandler(async (req, res) => {
 
   const userUpdate = await Users.findOneAndUpdate(
     { _id: ExistsUSer._id },
-    { $set: { status: status, role: state } },
+    { $set: { status: status, role: role } },
     { new: true }
   );
 

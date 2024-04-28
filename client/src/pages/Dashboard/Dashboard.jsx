@@ -293,10 +293,8 @@ const Dashboard = () => {
               style={{ padding: "15px 20px" }}
               className="card  card-table flex-fill"
             >
-              <BarChart data={chartData} />
-
               {/* User wise Pending Data show start */}
-              <br />
+
               <div className="card  card-table flex-fill">
                 <h5>User Wise Pending List</h5>
                 <div className="todo-container">
@@ -330,6 +328,8 @@ const Dashboard = () => {
                   </table>
                 </div>
               </div>
+
+              <BarChart data={chartData} />
               {/* User wise Pending Data show end */}
             </div>
           </div>
